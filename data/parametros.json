@@ -1,0 +1,237 @@
+{
+  "ne_por_cidade": {
+    "São Paulo": 1,
+    "Rio de Janeiro": 2,
+    "Belo Horizonte": 3,
+    "Brasília": 3,
+    "Fortaleza": 3,
+    "Salvador": 3,
+    "Campinas": 4,
+    "Curitiba": 4,
+    "Porto Alegre": 4,
+    "Recife": 4,
+    "Goiânia": 5,
+    "João Pessoa": 5,
+    "Maceió": 5,
+    "Natal": 5,
+    "Ribeirão Preto": 5,
+    "Cuiabá": 6,
+    "Joinville": 6,
+    "Santos": 6,
+    "Uberlândia": 6,
+    "Vitória": 6,
+    "Belém": 7,
+    "Campo Grande": 7,
+    "Manaus": 7,
+    "São Luís": 7,
+    "Vitória da Conquista": 7
+  },
+  "custos_ne": {
+    "1": {
+      "terreno_m2": 5000,
+      "agua_m3h": 14,
+      "ee_kwah": 22,
+      "contrat_mo": 1800,
+      "salario_mo": 200,
+      "manut_maq": 150,
+      "manut_cd_m2": 10.0
+    },
+    "2": {
+      "terreno_m2": 4750,
+      "agua_m3h": 20,
+      "ee_kwah": 26,
+      "contrat_mo": 1710,
+      "salario_mo": 190,
+      "manut_maq": 157.5,
+      "manut_cd_m2": 10.5
+    },
+    "3": {
+      "terreno_m2": 4500,
+      "agua_m3h": 26,
+      "ee_kwah": 30,
+      "contrat_mo": 1620,
+      "salario_mo": 180,
+      "manut_maq": 165,
+      "manut_cd_m2": 11.0
+    },
+    "4": {
+      "terreno_m2": 4250,
+      "agua_m3h": 32,
+      "ee_kwah": 34,
+      "contrat_mo": 1530,
+      "salario_mo": 170,
+      "manut_maq": 172.5,
+      "manut_cd_m2": 11.5
+    },
+    "5": {
+      "terreno_m2": 4000,
+      "agua_m3h": 38,
+      "ee_kwah": 38,
+      "contrat_mo": 1440,
+      "salario_mo": 160,
+      "manut_maq": 180,
+      "manut_cd_m2": 12.0
+    },
+    "6": {
+      "terreno_m2": 3750,
+      "agua_m3h": 44,
+      "ee_kwah": 42,
+      "contrat_mo": 1350,
+      "salario_mo": 150,
+      "manut_maq": 187.5,
+      "manut_cd_m2": 12.5
+    },
+    "7": {
+      "terreno_m2": 3500,
+      "agua_m3h": 50,
+      "ee_kwah": 46,
+      "contrat_mo": 1260,
+      "salario_mo": 140,
+      "manut_maq": 195,
+      "manut_cd_m2": 13.0
+    }
+  },
+  "fornecedores_mp": [
+    {
+      "mp": "MP1",
+      "cidade": "Manaus",
+      "custo_ton": 48000
+    },
+    {
+      "mp": "MP1",
+      "cidade": "Belém",
+      "custo_ton": 56000
+    },
+    {
+      "mp": "MP2",
+      "cidade": "Cuiabá",
+      "custo_ton": 16000
+    },
+    {
+      "mp": "MP2",
+      "cidade": "Vitória da Conquista",
+      "custo_ton": 22000
+    },
+    {
+      "mp": "MP3",
+      "cidade": "Joinville",
+      "custo_ton": 41000
+    },
+    {
+      "mp": "MP3",
+      "cidade": "Porto Alegre",
+      "custo_ton": 32000
+    }
+  ],
+  "modais": {
+    "Avião": {
+      "vel_kmh": 700,
+      "cap_ton": 1,
+      "frete_viagem": 12.0,
+      "frete_peso": 18.0,
+      "doc": 200
+    },
+    "Caminhão": {
+      "vel_kmh": 50,
+      "cap_ton": 24,
+      "frete_viagem": 8.0,
+      "frete_peso": 0.5,
+      "doc": 100
+    },
+    "Navio": {
+      "vel_kmh": 30,
+      "cap_ton": 100,
+      "frete_viagem": 5.0,
+      "frete_peso": 0.075,
+      "doc": 50
+    }
+  },
+  "bom_pa": {
+    "PA1": {
+      "MP1": 60,
+      "MP2": 90,
+      "MP3": 150,
+      "peso_total_g": 300,
+      "prod_un_min": 15
+    },
+    "PA2": {
+      "MP1": 75,
+      "MP2": 125,
+      "MP3": 50,
+      "peso_total_g": 250,
+      "prod_un_min": 30
+    },
+    "PA3": {
+      "MP1": 75,
+      "MP2": 30,
+      "MP3": 45,
+      "peso_total_g": 150,
+      "prod_un_min": 60
+    }
+  },
+  "densidade_mp_ton_m3": {
+    "MP1": 0.5,
+    "MP2": 0.7,
+    "MP3": 0.9
+  },
+  "densidade_pa_ton_m3": {
+    "PA1": 1.0,
+    "PA2": 0.5,
+    "PA3": 0.8
+  },
+  "preco_referencia": {
+    "PA1": 80,
+    "PA2": 50,
+    "PA3": 25
+  },
+  "custos_estruturais": {
+    "preco_maquina": 1500000,
+    "juros_maquina_mensal": 0.03,
+    "juros_terreno_mensal": 0.015,
+    "periodos_financiamento": 48,
+    "carregamento_mp_pct": 0.01,
+    "carregamento_pa_pct": 0.01,
+    "area_por_maquina_m2": 200,
+    "area_demais_estruturas_m2": 1000,
+    "pe_direito_deposito_m": 2,
+    "max_transportes_semana": 220,
+    "consumo_agua_m3_h_por_maq": 1.5,
+    "consumo_ee_kwa_h_por_maq": 2.5,
+    "horas_por_turno": 8
+  },
+  "restricoes_jogo": {
+    "max_fabricas": 2,
+    "max_cds": 4,
+    "max_maquinas_total": 8,
+    "duas_instalacoes_mesma_cidade": false,
+    "permite_instalacao_em_cidade_de_fornecedor": true
+  },
+  "rodadas_por_ano": 48,
+  "custos_pa": {
+    "PA1": {
+      "custo_mp_un": 9.12,
+      "preco_referencia": 80.0,
+      "prod_un_min": 15
+    },
+    "PA2": {
+      "custo_mp_un": 7.2,
+      "preco_referencia": 50.0,
+      "prod_un_min": 30
+    },
+    "PA3": {
+      "custo_mp_un": 5.52,
+      "preco_referencia": 25.0,
+      "prod_un_min": 60
+    },
+    "custo_var_extra_un": 0.26
+  },
+  "planner": {
+    "thresholds": {
+      "urgente_buffer_dias": 1,
+      "navio_min_frascos_pa1": 80001,
+      "navio_min_frascos_pa2": 96001,
+      "navio_min_frascos_pa3": 160001,
+      "pe_direito_m": 2.0
+    }
+  }
+}

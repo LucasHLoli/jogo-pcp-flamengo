@@ -1,0 +1,46 @@
+================================================================
+  SOLVER v2 — RODADA 5 — PLANO E PREVISÃO
+================================================================
+  Status: OptimizationStatus.FEASIBLE  (400s)  alpha=100
+
+────────────────────────────────────────────────────────────────
+  DRE PREVISTA — R5
+────────────────────────────────────────────────────────────────
+  Receita PA1 (180,608 un × R$69)    R$      12,461,952
+  (-) Compra MP                            R$      -8,366,159
+  (-) Frete (regra calibrada)              R$      -1,069,836
+  (-) Carregamento MP (buffer)             R$         -55,368
+  (-) Carregamento PA (PA2 parado)         R$        -402,617
+  (-) Parcela terrenos                     R$        -506,968
+  (-) Parcela máquinas                     R$        -415,567
+  (-) Contratação MO                       R$             -84
+  (-) Manut fábricas                       R$          -1,313
+  (-) Salário operários                    R$            -450
+  (-) Custo produção                       R$        -172,086
+  (-) Manut CDs                            R$         -26,683
+  ----------------------------------------------------------
+  RESULTADO R5                             R$       1,444,821
+
+────────────────────────────────────────────────────────────────
+  INDICADORES PREVISTOS — R5
+────────────────────────────────────────────────────────────────
+  Nível de Serviço (NS)          46.7%   (180,608 de 387,072 frascos)
+  Utilização fábrica média       43.5%
+  Min usados/dia               {1: 2223, 2: 5777, 3: 0, 4: 10080, 5: 3841}
+  Transportes                  220/220  (MP 117 | F1→CD 75 | CD→V 28)
+
+────────────────────────────────────────────────────────────────
+  ESTOQUE FINAL R5 (= buffer pra próxima)
+────────────────────────────────────────────────────────────────
+  MP no F1 (ton):  MP1 66.4  MP2 38.7  MP3 23.6
+  [balanço MP]  comprado(balanço,t) | qty_buy lida(t) | consumo(t) | fim(t)
+    MP1: compra 106.7t (R$ 5,120,383) | qty_buy 106.7t [ok] | consumo 47.5 | fim 66.4
+    MP2: compra 59.7t (R$ 955,947) | qty_buy 59.7t [ok] | consumo 33.1 | fim 38.7
+    MP3: compra 71.6t (R$ 2,289,829) | qty_buy 71.6t [ok] | consumo 52.8 | fim 23.6
+  PA em CD1 (São Luís): {'PA2': 70948}
+  PA em CD2 (Santos): {'PA1': 32622, 'PA2': 393359, 'PA3': 462358}
+
+────────────────────────────────────────────────────────────────
+  PREVISÃO DOS CENÁRIOS FUTUROS (com o buffer; 1/3 cada)
+────────────────────────────────────────────────────────────────
+  R5  →  PA1: NS 100% (R$ 34.4M)  |  PA2: NS 100% (R$ 44.7M)  |  PA3: NS 100% (R$ 46.5M)
