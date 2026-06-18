@@ -69,6 +69,7 @@ def construir_bloco(
     estado: EstadoRodada, cfg: Config,
     stk_mp_ini: Dict[str, Any], stk_pa_ini: Dict[tuple, Any],
     mp_em_transito: List[Dict[str, Any]], lt_fn, km_fn, relax: bool = False,
+    ship_from_stock: bool = False,
 ) -> BlocoRodada:
     """Monta um bloco-rodada. stk_*_ini podem ser floats (rodada atual) ou
     vars/exprs (cenários, ligados ao fim da rodada anterior).
@@ -84,31 +85,43 @@ def construir_bloco(
     P = label  # prefixo único de nomes
 
     # Rotas viáveis por OP
+    # Rotas viáveis por OP. Legado (ship_from_stock=False): exige que a cadeia de
+    # produção F1→CD→varejo caiba no prazo (tprod∈[1,5]). v3 (ship_from_stock=True):
+    # basta o embarque CD→varejo caber (t_envio∈[1,5]) — o CD pode despachar de
+    # ESTOQUE pré-posicionado (buffer) OU de produção; o balanço de stk_pa garante
+    # viabilidade. É isso que faz o buffer "pagar" em demanda de dia cedo (dia 1).
     op_rotas: Dict[int, List[Dict]] = {}
     for i, op in enumerate(ops):
         rotas = []
         for cd in cds:
             cd_cid = cds_info[cd]
-            for m1 in MODAIS:
-                lt1 = lt_fn(m1, fab, cd_cid)
-                if lt1 is None:
+            for m2 in MODAIS:
+                lt2 = lt_fn(m2, cd_cid, op["cidade"])
+                if lt2 is None:
                     continue
-                for m2 in MODAIS:
-                    lt2 = lt_fn(m2, cd_cid, op["cidade"])
-                    if lt2 is None:
-                        continue
-                    tprod = op["dia_entrega"] - lt1 - lt2
-                    if 1 <= tprod <= 5:
-                        rotas.append({"cd": cd, "m2": m2, "t_envio": op["dia_entrega"] - lt2})
+                t_envio = op["dia_entrega"] - lt2
+                if not (1 <= t_envio <= 5):
+                    continue
+                if ship_from_stock:
+                    rotas.append({"cd": cd, "m2": m2, "t_envio": t_envio})
+                    continue
+                for m1 in MODAIS:                       # legado: precisa caber a produção
+                    lt1 = lt_fn(m1, fab, cd_cid)
+                    if lt1 is not None and 1 <= op["dia_entrega"] - lt1 - lt2 <= 5:
+                        rotas.append({"cd": cd, "m2": m2, "t_envio": t_envio})
+                        break
         op_rotas[i] = rotas
 
+    # MP MULTIMODAL: uma entrada por (fornecedor, modal) — cada uma com seu lead.
+    # Permite trazer MP por avião (lead 0, caro) p/ demanda cedo, ou caminhão (lead 3, barato).
     forn_info = {}
     for mp in MPS:
         lst = []
         for f, c in cfg.fornecedores[mp]:
-            l = lt_fn("Caminhão", f, fab)
-            if l is not None:
-                lst.append((f, float(c), l))
+            for modal in MODAIS:
+                l = lt_fn(modal, f, fab)
+                if l is not None:
+                    lst.append((f, float(c), modal, l))   # (cidade, custo, modal, lead)
         forn_info[mp] = lst
 
     # --- Variáveis ---
@@ -117,7 +130,7 @@ def construir_bloco(
             for t in DIAS for pa in PAS}
     n_buy, qty_buy = {}, {}
     for mp in MPS:
-        for fi, (forn, custo, ltf) in enumerate(forn_info[mp]):
+        for fi, (forn, custo, modal, ltf) in enumerate(forn_info[mp]):
             for t in DIAS:
                 n_buy[(t, mp, fi)] = m.add_var(name=f"nbuy_{P}_{t}_{mp}_{fi}", var_type=VT_N, lb=0)
                 qty_buy[(t, mp, fi)] = m.add_var(name=f"qbuy_{P}_{t}_{mp}_{fi}", lb=0)
@@ -156,18 +169,23 @@ def construir_bloco(
         m += q <= n_f1cd[key] * _cap_un(key[3], key[2])
     for key, q in qty_cdv.items():                   # 3 cap modal CD->V
         m += q <= n_cdv[key] * _cap_un(key[4], key[3])
-    for key, q in qty_buy.items():                   # 4 cap modal Forn->F1
-        m += q <= n_buy[key] * CAP_MODAL_TON["Caminhão"]
+    for key, q in qty_buy.items():                   # 4 cap modal Forn->F1 (por modal)
+        modal_b = forn_info[key[1]][key[2]][2]
+        m += q <= n_buy[key] * CAP_MODAL_TON[modal_b]
     for t in DIAS:                                   # 5 PA sai no mesmo dia
         for pa in PAS:
             m += prod[(t, pa)] == mip.xsum(qty_f1cd[(t, cd, pa, mod)] for cd in cds for mod in MODAIS
                                            if (t, cd, pa, mod) in qty_f1cd)
+    # em-trânsito pode ser float (rodada atual, do estado) OU expressão de variável
+    # (cenário futuro recebendo MP pré-pedido na rodada anterior — inter-rodada).
     em_transito = {(d, mp): 0.0 for d in DIAS for mp in MPS}
     for x in mp_em_transito:
-        em_transito[(int(x["dia_rel"]), x["mp"])] += float(x["qtd"])
+        d = int(x["dia_rel"])
+        if 1 <= d <= 5:
+            em_transito[(d, x["mp"])] = em_transito[(d, x["mp"])] + x["qtd"]
     for t in DIAS:                                   # 6 balanço MP
         for mp in MPS:
-            cheg = [qty_buy[(t - ltf, mp, fi)] for fi, (f, c, ltf) in enumerate(forn_info[mp]) if (t - ltf) in DIAS]
+            cheg = [qty_buy[(t - ltf, mp, fi)] for fi, (f, c, mo, ltf) in enumerate(forn_info[mp]) if (t - ltf) in DIAS]
             consumo = mip.xsum(prod[(t, pa)] * BOM[pa][mp] / 1_000_000 for pa in PAS)
             m += stk_mp[(t, mp)] == stk_mp[(t - 1, mp)] + em_transito[(t, mp)] + (mip.xsum(cheg) if cheg else 0) - consumo
     for t in DIAS:                                   # 7 cap MP F1
@@ -198,7 +216,7 @@ def construir_bloco(
     receita = mip.xsum(x_op[i] * ops[i]["qtd"] * precos[ops[i]["pa"]] for i in range(len(ops)))
     custo_mp = mip.xsum(qty_buy[(t, mp, fi)] * forn_info[mp][fi][1]
                         for mp in MPS for fi in range(len(forn_info[mp])) for t in DIAS)
-    frete = mip.xsum(_freight_expr(cfg, "Caminhão", forn_info[mp][fi][0], fab, qty_buy[(t, mp, fi)], n_buy[(t, mp, fi)], mp, km_fn)
+    frete = mip.xsum(_freight_expr(cfg, forn_info[mp][fi][2], forn_info[mp][fi][0], fab, qty_buy[(t, mp, fi)], n_buy[(t, mp, fi)], mp, km_fn)
                      for mp in MPS for fi in range(len(forn_info[mp])) for t in DIAS)
     frete += mip.xsum(_freight_expr(cfg, k[3], fab, cds_info[k[1]], qty_f1cd[k], n_f1cd[k], k[2], km_fn) for k in qty_f1cd)
     frete += mip.xsum(_freight_expr(cfg, k[4], cds_info[k[1]], k[2], qty_cdv[k], n_cdv[k], k[3], km_fn) for k in qty_cdv)
@@ -256,6 +274,55 @@ def _ops_cenario(forecast_pa: Dict[str, List[float]], pa: str, day_map: Dict[str
     return ops
 
 
+def _ops_cenario_dist(forecast_pa: Dict[str, List[float]], pa: str,
+                      day_dist: Dict[int, float], idx: int) -> List[Dict]:
+    """Como _ops_cenario, mas ESPALHA a demanda de cada cidade pelos dias conforme a
+    distribuição de probabilidade `day_dist` {dia: fração}. Gera uma OP por (cidade, dia)
+    — assim o solver enxerga que parte da demanda futura pode vir cedo (dia 1) e decide
+    quanto pré-posicionar (buffer). Resíduo de arredondamento vai no dia de maior fração."""
+    ops = []
+    dias_ord = sorted(day_dist, key=lambda d: -day_dist[d])
+    for cidade, vals in forecast_pa.items():
+        q = int(round(vals[idx])) if idx < len(vals) else 0
+        if q <= 0:
+            continue
+        aloc = {d: int(round(q * f)) for d, f in day_dist.items()}
+        resto = q - sum(aloc.values())
+        aloc[dias_ord[0]] += resto                      # joga o resíduo no dia dominante
+        for dia, qd in aloc.items():
+            if qd > 0:
+                ops.append({"cidade": cidade, "pa": pa, "qtd": qd, "dia_entrega": dia})
+    return ops
+
+
+def _ops_cenario_umdia(forecast_pa: Dict[str, List[float]], pa: str,
+                       dia: int, idx: int) -> List[Dict]:
+    """Cenário com TODA a demanda do produto num ÚNICO dia (pico-num-dia, como o jogo
+    realmente faz desde a R8). Usado no modo `day_scenarios`: o solver vê o pico cedo
+    como risco e decide quanto buffer pré-posicionar. Diferente de _ops_cenario_dist,
+    que dilui o pico na média e por isso nunca valoriza buffer."""
+    ops = []
+    for cidade, vals in forecast_pa.items():
+        q = int(round(vals[idx])) if idx < len(vals) else 0
+        if q > 0:
+            ops.append({"cidade": cidade, "pa": pa, "qtd": q, "dia_entrega": dia})
+    return ops
+
+
+def _transito_prox(bloco) -> List[Dict[str, Any]]:
+    """MP comprado neste bloco que CHEGA depois do dia 5 → em-trânsito p/ a PRÓXIMA rodada.
+    Retorna [{dia_rel, mp, qtd(=variável)}]. É o que habilita o INTER-RODADA: o solver
+    pré-pede MP barato (caminhão, lead 3) no fim da rodada p/ chegar cedo na próxima, em vez
+    de pagar avião caro lá. qtd é uma VARIÁVEL do MILP (não número)."""
+    tr = []
+    for (t, mp, fi), qv in bloco.qty_buy.items():
+        ltf = bloco.forn_info[mp][fi][3]               # lead do modal dessa compra
+        dia_cheg = t + ltf
+        if 5 < dia_cheg <= 10:                         # chega na próxima rodada (dia rel 1..5)
+            tr.append({"dia_rel": dia_cheg - 5, "mp": mp, "qtd": qv})
+    return tr
+
+
 def resolver_multi(
     estado: EstadoRodada, ops_atual: List[Dict], precos_atual: Dict[str, float],
     cfg: Config, forecast: Dict[str, Dict[str, List[float]]] | None = None,
@@ -263,6 +330,8 @@ def resolver_multi(
     precos_futuro: Dict[str, float] | None = None,
     alpha: float = 100.0, time_limit_s: float = 240, verbose: bool = False,
     relax_cenarios: bool = True, n_future: int = 1, solver_name: str = mip.CBC,
+    day_dist: Dict[int, float] | None = None, ship_from_stock: bool = False,
+    day_scenarios: bool = False,
 ) -> ResultadoMulti:
     """Modelo multi-rodada. Rodada atual (demanda conhecida) + R+1 como 3 cenários
     (1/3 PA1/PA2/PA3, rodada cheia do forecast), com estoque de MP do fim da rodada
@@ -278,7 +347,8 @@ def resolver_multi(
 
     # Bloco da rodada ATUAL (R4)
     b = construir_bloco(m, "R", ops_atual, precos_atual, estado, cfg,
-                        stk_mp_ini, stk_pa_ini, estado.mp_em_transito, lt_fn, km_fn)
+                        stk_mp_ini, stk_pa_ini, estado.mp_em_transito, lt_fn, km_fn,
+                        ship_from_stock=ship_from_stock)
     obj = b.lucro_expr - alpha * b.unmet_expr
 
     # Cenários futuros encadeados (R5, R6, R7...) por BUFFER MÉDIO (mean-chain):
@@ -288,15 +358,35 @@ def resolver_multi(
     if forecast is not None:
         prev_mp = {mp: b.stk_mp[(5, mp)] for mp in MPS}
         prev_pa = {(cd, pa): b.stk_pa[(5, cd, pa)] for cd in estado.cds_info for pa in PAS}
+        transito_b = _transito_prox(b)                  # MP pré-pedido na rodada atual → R+1
         for k in range(n_future):                       # k=0→R(atual+1), ...
             rod = estado.rodada + 1 + k
+            transito_k = transito_b if k == 0 else []    # inter-rodada só p/ a próxima rodada
             blocos_rod = {}
             for pa in PAS:
-                ops_s = _ops_cenario(forecast[pa], pa, day_map or {}, k)
+                if day_scenarios and day_dist:
+                    # 1 cenário por DIA (pico-num-dia): peso = (1/3 do produto)×prob(dia).
+                    # Faz o solver enxergar o risco de demanda cedo e decidir o buffer ótimo.
+                    for dia, prob in day_dist.items():
+                        if prob <= 0:
+                            continue
+                        ops_s = _ops_cenario_umdia(forecast[pa], pa, dia, k)
+                        if not ops_s:
+                            continue
+                        bs = construir_bloco(m, f"R{rod}{pa}d{dia}", ops_s, precos_futuro, estado, cfg,
+                                             prev_mp, prev_pa, transito_k, lt_fn, km_fn, relax=relax_cenarios,
+                                             ship_from_stock=ship_from_stock)
+                        blocos_rod[f"{pa}d{dia}"] = bs
+                        cenarios[f"R{rod}_{pa}_d{dia}"] = bs
+                        obj += (1.0 / 3.0) * prob * (bs.lucro_expr - alpha * bs.unmet_expr)
+                    continue
+                ops_s = (_ops_cenario_dist(forecast[pa], pa, day_dist, k) if day_dist
+                         else _ops_cenario(forecast[pa], pa, day_map or {}, k))
                 if not ops_s:
                     continue
                 bs = construir_bloco(m, f"R{rod}{pa}", ops_s, precos_futuro, estado, cfg,
-                                     prev_mp, prev_pa, [], lt_fn, km_fn, relax=relax_cenarios)
+                                     prev_mp, prev_pa, transito_k, lt_fn, km_fn, relax=relax_cenarios,
+                                     ship_from_stock=ship_from_stock)
                 blocos_rod[pa] = bs
                 cenarios[f"R{rod}_{pa}"] = bs
                 obj += (1.0 / 3.0) * (bs.lucro_expr - alpha * bs.unmet_expr)

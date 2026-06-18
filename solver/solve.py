@@ -72,6 +72,89 @@ def ops_r6():
     ]]
 
 
+def ops_r7():
+    """OPs oficiais de R7 (Rodada_07_PA2.pdf). PA2. dia_entrega RELATIVO (abs-30):
+    Dia 31→1, 32→2, 33→3, 34→4, 35→5. Total 895.793 PA2 (sem demanda no dia 35).
+    Totais/dia conferidos: 131.681 / 181.847 / 269.186 / 313.079."""
+    return [{"cidade": c, "pa": "PA2", "qtd": q, "dia_entrega": d} for c, q, d in [
+        ("Belém", 15676, 1), ("Belo Horizonte", 47029, 3), ("Brasília", 67185, 3),
+        ("Campinas", 37623, 4), ("Campo Grande", 13437, 3), ("Cuiabá", 16124, 3),
+        ("Curitiba", 59122, 4), ("Fortaleza", 53300, 1), ("Goiânia", 37623, 3),
+        ("João Pessoa", 31353, 2), ("Joinville", 16124, 4), ("Maceió", 31353, 2),
+        ("Manaus", 15676, 1), ("Natal", 31353, 1), ("Porto Alegre", 59122, 4),
+        ("Recife", 47029, 2), ("Ribeirão Preto", 31353, 4), ("Rio de Janeiro", 62706, 3),
+        ("Salvador", 62706, 2), ("Santos", 31353, 4), ("São Luís", 15676, 1),
+        ("São Paulo", 78382, 4), ("Uberlândia", 15676, 3), ("Vitória", 9406, 3),
+        ("Vitória da Conquista", 9406, 2),
+    ]]
+
+
+def ops_r8():
+    """OPs oficiais de R8 (Rodada_08_PA3.pdf). PA3. Toda a carteira entrega no Dia 39
+    → dia_entrega RELATIVO (abs-35) = 4. Total 1.335.398 PA3."""
+    return [{"cidade": c, "pa": "PA3", "qtd": q, "dia_entrega": 4} for c, q in [
+        ("Belém", 20031), ("Belo Horizonte", 70108), ("Brasília", 116847),
+        ("Campinas", 56087), ("Campo Grande", 23369), ("Cuiabá", 28043),
+        ("Curitiba", 102826), ("Fortaleza", 68105), ("Goiânia", 65435),
+        ("João Pessoa", 40062), ("Joinville", 28043), ("Maceió", 40062),
+        ("Manaus", 20031), ("Natal", 40062), ("Porto Alegre", 102826),
+        ("Recife", 60093), ("Ribeirão Preto", 46739), ("Rio de Janeiro", 93478),
+        ("Salvador", 80124), ("Santos", 46739), ("São Luís", 20031),
+        ("São Paulo", 116847), ("Uberlândia", 23369), ("Vitória", 14022),
+        ("Vitória da Conquista", 12019),
+    ]]
+
+
+def ops_r9():
+    """OPs oficiais de R9 (Rodada_09_PA2.pdf). PA2. Toda a carteira entrega no Dia 43
+    → dia_entrega RELATIVO (abs-40) = 3. Total 928.973 PA2 (= previsão forecast_v2 cravada)."""
+    return [{"cidade": c, "pa": "PA2", "qtd": q, "dia_entrega": 3} for c, q in [
+        ("Belém", 16257), ("Belo Horizonte", 48771), ("Brasília", 69673),
+        ("Campinas", 39017), ("Campo Grande", 13935), ("Cuiabá", 16722),
+        ("Curitiba", 61312), ("Fortaleza", 55274), ("Goiânia", 39017),
+        ("João Pessoa", 32514), ("Joinville", 16722), ("Maceió", 32514),
+        ("Manaus", 16257), ("Natal", 32514), ("Porto Alegre", 61312),
+        ("Recife", 48771), ("Ribeirão Preto", 32514), ("Rio de Janeiro", 65028),
+        ("Salvador", 65028), ("Santos", 32514), ("São Luís", 16257),
+        ("São Paulo", 81285), ("Uberlândia", 16257), ("Vitória", 9754),
+        ("Vitória da Conquista", 9754),
+    ]]
+
+
+def ops_r10():
+    """OPs oficiais de R10 (Rodada_10_PA3.pdf). PA3. Toda a carteira entrega no Dia 47
+    → dia_entrega RELATIVO (abs-45) = 2. Total 1.492.994 PA3 (= previsão forecast_v2: 1.492.988, diff 6).
+    ATENÇÃO: demanda no dia 2 (muito cedo) — round difícil, buffer crítico."""
+    return [{"cidade": c, "pa": "PA3", "qtd": q, "dia_entrega": 2} for c, q in [
+        ("Belém", 22395), ("Belo Horizonte", 78382), ("Brasília", 130637),
+        ("Campinas", 62706), ("Campo Grande", 26127), ("Cuiabá", 31353),
+        ("Curitiba", 114960), ("Fortaleza", 76143), ("Goiânia", 73157),
+        ("João Pessoa", 44790), ("Joinville", 31353), ("Maceió", 44790),
+        ("Manaus", 22395), ("Natal", 44790), ("Porto Alegre", 114960),
+        ("Recife", 67185), ("Ribeirão Preto", 52255), ("Rio de Janeiro", 104509),
+        ("Salvador", 89580), ("Santos", 52255), ("São Luís", 22395),
+        ("São Paulo", 130637), ("Uberlândia", 26127), ("Vitória", 15676),
+        ("Vitória da Conquista", 13437),
+    ]]
+
+
+def ops_r11():
+    """OPs oficiais de R11 (Rodada_11_PA1.pdf). PA1. Demanda ESPALHADA (dias 52-55).
+    dia_entrega RELATIVO (abs-50): 52→2, 53→3, 54→4, 55→5. Total 381.544 PA1
+    (= previsão forecast_v2: 381.542, diff 2). Por dia: d2=152.617 d3=125.910 d4=59.749 d5=43.268."""
+    return [{"cidade": c, "pa": "PA1", "qtd": q, "dia_entrega": d} for c, q, d in [
+        ("Belém", 5151, 5), ("Belo Horizonte", 28616, 3), ("Brasília", 21939, 3),
+        ("Campinas", 22893, 2), ("Campo Grande", 4388, 3), ("Cuiabá", 5265, 3),
+        ("Curitiba", 19306, 2), ("Fortaleza", 17513, 5), ("Goiânia", 12286, 3),
+        ("João Pessoa", 10302, 4), ("Joinville", 5265, 2), ("Maceió", 10302, 4),
+        ("Manaus", 5151, 5), ("Natal", 10302, 5), ("Porto Alegre", 19306, 2),
+        ("Recife", 15452, 4), ("Ribeirão Preto", 19077, 2), ("Rio de Janeiro", 38154, 3),
+        ("Salvador", 20603, 4), ("Santos", 19077, 2), ("São Luís", 5151, 5),
+        ("São Paulo", 47693, 2), ("Uberlândia", 9539, 3), ("Vitória", 5723, 3),
+        ("Vitória da Conquista", 3090, 4),
+    ]]
+
+
 def ops_r3():
     return [{"cidade": c, "pa": "PA3", "qtd": q, "dia_entrega": d} for c, q, d in [
         ("Belém", 20155, 5), ("Belo Horizonte", 70544, 3), ("Brasília", 117573, 3),

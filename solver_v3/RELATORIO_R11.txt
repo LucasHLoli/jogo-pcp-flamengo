@@ -1,16 +1,17 @@
 ================================================================
-  SOLVER v2 — RODADA 6 — PLANO E PREVISÃO
+  SOLVER v3 (estocástico no dia) — RODADA 11 — PLANO E PREVISÃO
 ================================================================
-  Status: OptimizationStatus.OPTIMAL  (1s)  alpha=100
+  Status: OptimizationStatus.FEASIBLE  (401s)  alpha=100
+  Dias futuros ~ distribuição: d1:4% d2:33% d3:26% d4:29% d5:8%
 
 ────────────────────────────────────────────────────────────────
-  DRE PREVISTA — R6
+  DRE PREVISTA — R11
 ────────────────────────────────────────────────────────────────
-  Receita PA2 (962,152 un × R$48)    R$      46,183,296
-  (-) Compra MP                            R$      -5,292,605
-  (-) Frete (regra calibrada)              R$        -905,887
-  (-) Carregamento MP (buffer)             R$         -46,626
-  (-) Carregamento PA (PA2 parado)         R$        -331,851
+  Receita PA1 (381,544 un × R$77)    R$      29,378,888
+  (-) Compra MP                            R$      -7,385,795
+  (-) Frete (regra calibrada)              R$      -1,301,322
+  (-) Carregamento MP (buffer)             R$             -81
+  (-) Carregamento PA (buffer)             R$        -204,375
   (-) Parcela terrenos                     R$        -506,968
   (-) Parcela máquinas                     R$        -415,567
   (-) Contratação MO                       R$             -84
@@ -19,30 +20,29 @@
   (-) Custo produção                       R$        -172,086
   (-) Manut CDs                            R$         -26,683
   ----------------------------------------------------------
-  RESULTADO R6                             R$      38,483,176
+  RESULTADO R11                             R$      19,364,164
 
 ────────────────────────────────────────────────────────────────
-  INDICADORES PREVISTOS — R6
+  INDICADORES PREVISTOS — R11
 ────────────────────────────────────────────────────────────────
-  Nível de Serviço (NS)         100.0%   (962,152 de 962,152 frascos)
-  Utilização fábrica média       55.3%
-  Min usados/dia               {1: 6058, 2: 7822, 3: 10080, 4: 3907, 5: 0}
-  Transportes                  63/220  (MP 9 | F1→CD 11 | CD→V 43)
+  Nível de Serviço (NS)         100.0%   (381,544 de 381,544 frascos)
+  Utilização fábrica média       40.0%
+  Min usados/dia               {1: 9866, 2: 7860, 3: 2444, 4: 0, 5: 0}
+  Transportes                  138/220  (MP 66 | F1→CD 47 | CD→V 25)
 
 ────────────────────────────────────────────────────────────────
-  ESTOQUE FINAL R6 (= buffer pra próxima)
+  ESTOQUE FINAL R11 (= buffer pré-posicionado p/ próxima)
 ────────────────────────────────────────────────────────────────
-  MP no F1 (ton):  MP1 50.3  MP2 50.4  MP3 18.0
-  [balanço MP]  comprado(balanço,t) | qty_buy lida(t) | consumo(t) | fim(t)
-    MP1: compra 48.0t (R$ 2,304,000) | qty_buy 48.0t [ok] | consumo 64.1 | fim 50.3
-    MP2: compra 102.9t (R$ 1,645,644) | qty_buy 102.9t [ok] | consumo 91.2 | fim 50.4
-    MP3: compra 42.0t (R$ 1,342,962) | qty_buy 42.0t [ok] | consumo 47.5 | fim 18.0
-  PA em CD1 (São Luís): {'PA1': 50872, 'PA2': 156429, 'PA3': 160000}
-  PA em CD2 (Santos): {'PA1': 32622, 'PA3': 462358}
+  MP no F1 (ton):  MP1 0.0  MP2 0.9  MP3 1.5
+    MP1: compra 80.2t (R$ 3,851,701) | consumo 18.2 | fim 0.0
+    MP2: compra 65.9t (R$ 1,054,889) | consumo 27.2 | fim 0.9
+    MP3: compra 77.5t (R$ 2,479,204) | consumo 45.4 | fim 1.5
+  PA em CD1 (São Luís): {'PA1': 4513, 'PA2': 974, 'PA3': 1740}
+  PA em CD2 (Santos): {'PA2': 399685}
 
 ────────────────────────────────────────────────────────────────
-  PREVISÃO DOS CENÁRIOS FUTUROS (com o buffer; 1/3 cada)
+  PREVISÃO DOS CENÁRIOS FUTUROS (1/3 cada produto; demanda espalhada nos dias)
 ────────────────────────────────────────────────────────────────
-  R7  →  PA1: NS 100% (R$ 32.3M)  |  PA2: NS 100% (R$ 41.1M)  |  PA3: NS 100% (R$ 40.1M)
-  R8  →  PA1: NS 100% (R$ 31.2M)  |  PA2: NS 100% (R$ 49.8M)  |  PA3: NS 100% (R$ 41.6M)
-  R9  →  PA1: NS 100% (R$ 19.4M)  |  PA2: NS 100% (R$ 54.0M)  |  PA3: NS 100% (R$ 43.2M)
+  R12  →  PA1: NS 100% (R$ 29.9M)  |  PA2: NS 100% (R$ 44.2M)  |  PA3: NS 100% (R$ 37.3M)
+  R13  →  PA1: NS 100% (R$ 22.6M)  |  PA2: NS 100% (R$ 31.9M)  |  PA3: NS 100% (R$ 29.6M)
+  R14  →  PA1: NS 100% (R$ 24.2M)  |  PA2: NS 100% (R$ 34.6M)  |  PA3: NS 100% (R$ 26.3M)

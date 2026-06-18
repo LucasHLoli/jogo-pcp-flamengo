@@ -76,9 +76,19 @@ _R6_PA2 = {
     "Santos": 33675, "São Luís": 16838, "São Paulo": 84188, "Uberlândia": 16838,
     "Vitória": 10103, "Vitória da Conquista": 10103,
 }
+_R7_PA2 = {
+    "Belém": 15676, "Belo Horizonte": 47029, "Brasília": 67185, "Campinas": 37623,
+    "Campo Grande": 13437, "Cuiabá": 16124, "Curitiba": 59122, "Fortaleza": 53300,
+    "Goiânia": 37623, "João Pessoa": 31353, "Joinville": 16124, "Maceió": 31353,
+    "Manaus": 15676, "Natal": 31353, "Porto Alegre": 59122, "Recife": 47029,
+    "Ribeirão Preto": 31353, "Rio de Janeiro": 62706, "Salvador": 62706,
+    "Santos": 31353, "São Luís": 15676, "São Paulo": 78382, "Uberlândia": 15676,
+    "Vitória": 9406, "Vitória da Conquista": 9406,
+}
 # Ordem cronológica das rodadas reais já jogadas, por produto.
 # R6 = PRIMEIRA rodada PA2 do jogo → ancora a série densa de PA2 (antes só histórico).
-_REALIZADO = {"PA1": [_R2_PA1, _R5_PA1], "PA2": [_R6_PA2], "PA3": [_R3_PA3, _R4_PA3]}
+# R7 = 2ª PA2 (real 895.793; HW previu 879.873 → erro -1,8%). Atualiza a série de PA2.
+_REALIZADO = {"PA1": [_R2_PA1, _R5_PA1], "PA2": [_R6_PA2, _R7_PA2], "PA3": [_R3_PA3, _R4_PA3]}
 
 
 def _carregar_historico() -> pd.DataFrame:

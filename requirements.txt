@@ -1,5 +1,6 @@
 pandas>=2.1
 numpy>=1.26
+mip>=1.15
 statsmodels>=0.14
 pulp>=2.7
 openpyxl>=3.1

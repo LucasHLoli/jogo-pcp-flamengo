@@ -21,18 +21,29 @@ BASE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE))
 from src.config import Config
 from solver.milp import (PAS, MPS, BOM, VEL_UN_MIN, CAP_MODAL_TON,
-                         FRETE_VIAGEM, FRETE_PESO, PESO_UN_TON, _cap_un)
-from solver.state import estado_r4_flamengo, estado_r5_flamengo, estado_r6_flamengo
-from solver.solve import ops_r4, ops_r5, ops_r6
+                         FRETE_VIAGEM, FRETE_PESO, PESO_UN_TON, DOC_MODAL, _cap_un)
+from solver.state import (estado_r4_flamengo, estado_r5_flamengo,
+                          estado_r6_flamengo, estado_r7_flamengo, estado_r8_flamengo,
+                          estado_r9_flamengo, estado_r10_flamengo, estado_r11_flamengo)
+from solver.solve import ops_r4, ops_r5, ops_r6, ops_r7, ops_r8, ops_r9, ops_r10, ops_r11
 
 RODADA = int(sys.argv[1]) if len(sys.argv) > 1 else 6
+# 2º arg opcional: pasta-fonte do envio (default solver_v2; use "solver_v3" p/ a v3).
+SRC = sys.argv[2] if len(sys.argv) > 2 else "solver_v2"
 ABS0 = (RODADA - 1) * 5          # dia absoluto antes do Dia 1 da rodada
 _PRECO_ROD = {4: {"PA1": 80, "PA2": 50, "PA3": 20}, 5: {"PA1": 69, "PA2": 50, "PA3": 32},
-              6: {"PA1": 69, "PA2": 48, "PA3": 32}}
+              6: {"PA1": 69, "PA2": 48, "PA3": 32}, 7: {"PA1": 80, "PA2": 44, "PA3": 32},
+              8: {"PA1": 80, "PA2": 50, "PA3": 24}, 9: {"PA1": 80, "PA2": 55, "PA3": 32},
+              10: {"PA1": 80, "PA2": 55, "PA3": 27}, 11: {"PA1": 77, "PA2": 55, "PA3": 27}}
 _ESTADO_OPS = {4: (estado_r4_flamengo, ops_r4), 5: (estado_r5_flamengo, ops_r5),
-               6: (estado_r6_flamengo, ops_r6)}
+               6: (estado_r6_flamengo, ops_r6), 7: (estado_r7_flamengo, ops_r7),
+               8: (estado_r8_flamengo, ops_r8), 9: (estado_r9_flamengo, ops_r9),
+               10: (estado_r10_flamengo, ops_r10), 11: (estado_r11_flamengo, ops_r11)}
 PRECO = _PRECO_ROD[RODADA]
 MAIOR_MP = {"MP1": 56000, "MP2": 22000, "MP3": 41000}
+# Base FIXA p/ carregamento de PA (1% = R$/frasco), independente do preço da rodada.
+# Calibrado vs Estoques R6: PA1 0,80 / PA2 0,50 / PA3 0,25.
+MAIOR_PA = {"PA1": 80, "PA2": 50, "PA3": 25}
 FIX = {"Parcela terrenos": -506968, "Parcela máquinas": -415567, "Contratação MO": -84,
        "Manut fábricas": -1313, "Salário operários": -450, "Custo produção": -172086,
        "Manut CDs": -26683}
@@ -82,7 +93,7 @@ def main():
     forn_mp = {mp: [c for c, _ in cfg.fornecedores[mp]] for mp in MPS}
     cheap = {mp: min(cfg.fornecedores[mp], key=lambda x: x[1])[1] for mp in MPS}
 
-    F = BASE / "solver_v2" / "rodadas" / f"rodada_{RODADA}" / f"FLAMENGO_ENVIO_R{RODADA}.xlsm"
+    F = BASE / SRC / "rodadas" / f"rodada_{RODADA}" / f"FLAMENGO_ENVIO_R{RODADA}.xlsm"
     wb = openpyxl.load_workbook(F, data_only=True)
     rows = list(wb["SOL_TRANSP"].iter_rows(values_only=True))
     hi = next(i for i, r in enumerate(rows) if r and r[0] == "Rodada")
@@ -156,7 +167,7 @@ def main():
         em_transito[(int(x["dia_rel"]), x["mp"])] += float(x["qtd"])
     buys_arr = defaultdict(float)              # chegada de compras: (dia_cheg, mp)
     for r in buys:
-        l = lt("Caminhão", r["cido"], fab)
+        l = lt(r["modal"], r["cido"], fab)     # MP multimodal: lead do modal da linha (avião=0)
         if l is not None and (r["dia"] + l) in DIAS:
             buys_arr[(r["dia"] + l, r["item"])] += r["qt"]
     stk_mp = {mp: estado.estoque_mp_ton.get(mp, 0.0) for mp in MPS}
@@ -235,16 +246,20 @@ def main():
         f"fornecedores: {dict(forn_usado)}")
 
     # ---------- DRE (frete calibrado) ----------
+    # Avião recalibrado (11,6 vs 12 nominal): casa a DRE realizada R3/R5/R6/R7. Ver solve_v2.
+    FRETE_VIAGEM_CAL = dict(FRETE_VIAGEM)   # nominal (avião=12); CT-e tratado à parte
+
     def frete_exato(modal, kv, qt, item):
         if kv <= 0:
             return 0.0
         peso = qt * PESO_UN_TON[item] if item in PAS else qt
         cap = CAP_MODAL_TON[modal]
         ocup = peso / cap if cap > 0 else 0
-        return FRETE_VIAGEM[modal] * kv if ocup >= 0.8 else FRETE_PESO[modal] * kv * peso
+        base = FRETE_VIAGEM_CAL[modal] * kv if ocup >= 0.8 else FRETE_PESO[modal] * kv * peso
+        return base + DOC_MODAL[modal]   # CT-e/documento por transporte (rulebook)
     frete = 0.0
     for r in buys:
-        frete += frete_exato("Caminhão", km("Caminhão", r["cido"], fab), r["qt"], r["item"])
+        frete += frete_exato(r["modal"], km(r["modal"], r["cido"], fab), r["qt"], r["item"])
     for r in f1cd:
         frete += frete_exato(r["modal"], km(r["modal"], fab, r["cidd"]), r["qt"], r["item"])
     for r in cdv:
@@ -252,8 +267,12 @@ def main():
     produto = ops[0]["pa"]                         # produto da rodada (todos iguais)
     receita = ns_qt * PRECO[produto]               # preço do produto DESTA rodada
     custo_mp = sum(mp_comprado[mp] * cheap[mp] for mp in MPS)
-    carreg_mp = sum(estoque_mp_fim[mp] * MAIOR_MP[mp] * 0.01 for mp in MPS)
-    carreg_pa = sum(estoque_pa_fim[cd][pa] * PRECO[pa] * 0.01 for cd in cds_info for pa in PAS)
+    # Carregamento de MP: exclui a MP que chegou no dia 5 (compra-buffer recém-recebida
+    # não paga carregamento; validado vs DRE real R8, MP1 cravou). Ver project_carregamento_calibrado.
+    receb_d5_mp = {mp: em_transito[(5, mp)] + buys_arr[(5, mp)] for mp in MPS}
+    base_carreg_mp = {mp: max(0.0, estoque_mp_fim[mp] - receb_d5_mp[mp]) for mp in MPS}
+    carreg_mp = sum(base_carreg_mp[mp] * MAIOR_MP[mp] * 0.001 for mp in MPS)  # 0,1%/rodada
+    carreg_pa = sum(estoque_pa_fim[cd][pa] * MAIOR_PA[pa] * 0.01 for cd in cds_info for pa in PAS)  # base fixa
     fix_tot = sum(FIX.values())
     resultado = receita - custo_mp - frete - carreg_mp - carreg_pa + fix_tot
 
@@ -270,13 +289,13 @@ def main():
 
     # 00 RESUMO
     ws = wbo.active; ws.title = "00_RESUMO"
-    title(ws, 1, 4, f"SANITY CHECK — RODADA 4 (solução Gurobi) — {'TUDO OK ✅' if all(c[1] for c in checks) else 'TEM ALERTA ❌'}")
+    title(ws, 1, 4, f"SANITY CHECK — RODADA {RODADA} (solução solver_v2) — {'TUDO OK ✅' if all(c[1] for c in checks) else 'TEM ALERTA ❌'}")
     res_rows = [
         ("Indicador", "Valor", "", ""),
         ("Nível de Serviço (NS)", f"{ns_pct:.1f}%  ({ns_ok_cnt}/{len(ops)} OPs, {ns_qt:,} de {total_qt:,})", "", ""),
         ("Descartes (chegada fora do dia)", f"{round(descartes):,} frascos", "", ""),
         ("Receita", f"R$ {receita:,.0f}", "", ""),
-        ("RESULTADO R4", f"R$ {resultado:,.0f}", "", ""),
+        (f"RESULTADO R{RODADA}", f"R$ {resultado:,.0f}", "", ""),
         ("Transportes", f"{n_transp}/220", "", ""),
         ("Checks que passaram", f"{sum(1 for c in checks if c[1])}/{len(checks)}", "", ""),
     ]
@@ -309,11 +328,11 @@ def main():
 
     # 03 DRE
     ws = aba("03_DRE")
-    title(ws, 1, 2, "DRE PREVISTA — Rodada 4 (frete calibrado)")
-    dre = [("Receita PA3", receita), ("(-) Compra MP", -custo_mp), ("(-) Frete", -frete),
+    title(ws, 1, 2, f"DRE PREVISTA — Rodada {RODADA} (frete calibrado)")
+    dre = [(f"Receita {produto}", receita), ("(-) Compra MP", -custo_mp), ("(-) Frete", -frete),
            ("(-) Carregamento MP", -carreg_mp), ("(-) Carregamento PA", -carreg_pa)]
     dre += [(f"(-) {k}", v) for k, v in FIX.items()]
-    dre += [("RESULTADO R4", resultado)]
+    dre += [(f"RESULTADO R{RODADA}", resultado)]
     ws.append([]); ws.append(["Linha", "R$"])
     for j in (1, 2):
         ws.cell(3, j).font = F_B; ws.cell(3, j).fill = FILL_SUB
@@ -324,7 +343,7 @@ def main():
 
     # 04 INDICADORES
     ws = aba("04_INDICADORES")
-    title(ws, 1, 2, "INDICADORES PREVISTOS — R4")
+    title(ws, 1, 2, f"INDICADORES PREVISTOS — R{RODADA}")
     mins_dia = {t: round(sum(prod[(t, pa)] / VEL_UN_MIN[pa] for pa in PAS)) for t in DIAS}
     ocup_modal = defaultdict(float)
     for r in (buys + f1cd + cdv):
@@ -346,7 +365,7 @@ def main():
 
     # 05 ESTOQUE FINAL (pós-R4) — o que entra na R5
     ws = aba("05_ESTOQUE_FINAL")
-    title(ws, 1, 4, "ESTOQUE FINAL PREVISTO (fim de R4 = início de R5)")
+    title(ws, 1, 4, f"ESTOQUE FINAL PREVISTO (fim de R{RODADA} = início de R{RODADA+1})")
     ws.append([]); ws.append(["MP no F1", "ton", "trajetória D1..D5", "cap (t)"])
     for j in range(1, 5):
         ws.cell(3, j).font = F_B; ws.cell(3, j).fill = FILL_SUB
@@ -362,7 +381,7 @@ def main():
 
     # 06 TRANSPORTES (todas as linhas R4)
     ws = aba("06_TRANSPORTES")
-    title(ws, 1, 8, "TODAS AS LINHAS DE TRANSPORTE — R4")
+    title(ws, 1, 8, f"TODAS AS LINHAS DE TRANSPORTE — R{RODADA}")
     ws.append([]); ws.append(["Origem", "Cidade orig", "Dia(rel)", "Modal", "Item", "Qtde", "Destino", "Chega dia(rel)"])
     for j in range(1, 9):
         ws.cell(3, j).font = F_B; ws.cell(3, j).fill = FILL_SUB
@@ -384,7 +403,7 @@ def main():
                     mx = max(mx, min(60, len(str(c.value)) + 2))
             w.column_dimensions[letter].width = mx
 
-    out = BASE / "solver_v2" / "rodadas" / f"rodada_{RODADA}" / f"SanityCheck_Gurobi_R{RODADA}.xlsm"
+    out = BASE / SRC / "rodadas" / f"rodada_{RODADA}" / f"SanityCheck_Gurobi_R{RODADA}.xlsm"
     wbo.save(out)
 
     # ---------- print resumo no terminal ----------
@@ -392,7 +411,7 @@ def main():
     print(f"  SANITY CHECK R{RODADA} (Gurobi) — RESUMO")
     print("=" * 60)
     print(f"  NS: {ns_pct:.1f}% ({ns_ok_cnt}/{len(ops)} OPs) | descartes: {round(descartes)}")
-    print(f"  Resultado R4: R$ {resultado:,.0f} | Transportes: {n_transp}/220")
+    print(f"  Resultado R{RODADA}: R$ {resultado:,.0f} | Transportes: {n_transp}/220")
     print(f"  Estoque MP fim: " + " ".join(f"{mp}={estoque_mp_fim[mp]:.1f}t" for mp in MPS))
     print(f"  Estoque PA fim: " + str({f"{cd}:{pa}": estoque_pa_fim[cd][pa] for cd in cds_info for pa in PAS if estoque_pa_fim[cd][pa] > 0}))
     print("  CHECKS:")

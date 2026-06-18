@@ -278,6 +278,136 @@ def estado_r6_flamengo() -> EstadoRodada:
     return consolidar_estado(6, flam, cfg, estoque_mp, estoque_pa, historico)
 
 
+def estado_r7_flamengo() -> EstadoRodada:
+    """Estado de início de R7 (= fim de R6). R6 FOI submetida — a previsão do solver
+    cravou de novo o fim de R6 (MP1 50,3 MP2 50,4 MP3 18,0; PA idênticos), validado
+    vs Estoques R7 (erro do resultado 0,03% após corrigir os 2 carregamentos).
+
+    Fonte: rodadas/rodada_7/ESTOQUES_FLAMENGO.pdf (saldos no Dia 30).
+      MP F1 Joinville: MP1=50,29t, MP2=50,39t, MP3=18,00t
+      PA: CD1 (São Luís) PA1=50.872, PA2=156.404, PA3=160.000 ;
+          CD2 (Santos)   PA1=32.622, PA2=0,       PA3=462.358.
+      MP em-trânsito p\\ R7: NENHUM — o balanço de MP da R6 (ini+compra-consumo) fecha
+      exatamente no estoque físico do Dia 30, logo toda MP comprada em R6 já chegou.
+    R7 = PA2 @ R$44 (IND rodada_7). Carteira real R7 = 895.793 PA2.
+    """
+    cfg = Config.load(BASE)
+    flam = BASE / "rodadas" / "rodada_7" / "FLAMENGO.xlsm"
+    estoque_mp = {"MP1": 50.29, "MP2": 50.39, "MP3": 18.00}
+    estoque_pa = {
+        "CD1": {"PA1": 50_872, "PA2": 156_404, "PA3": 160_000},  # São Luís
+        "CD2": {"PA1": 32_622, "PA2": 0,       "PA3": 462_358},  # Santos
+    }
+    # DRE oficial realizada (rodadas/rodada_7/DRE_FLAMENGO.pdf): R1..R6.
+    historico = [-5_602_321.0, -11_554_929.0, 35_617_989.0, -1_356_169.0,
+                 1_603_752.0, 38_569_647.0]
+    return consolidar_estado(7, flam, cfg, estoque_mp, estoque_pa, historico)
+
+
+def estado_r8_flamengo() -> EstadoRodada:
+    """Estado de início de R8 (= fim de R7). R7 FOI submetida e o solver cravou o fim
+    de R7: a previsão bateu o estoque real unidade-a-unidade (resultado 0,018% após
+    calibrar o avião do frete a 11,6 — ver project_regra_frete_calibrada).
+
+    Fonte: solver_v2/rodadas/rodada_8/ESTOQUES_FLAMENGO.pdf (saldos no Dia 35).
+      MP F1 Joinville: MP1=49,75t, MP2=49,48t, MP3=41,63t
+      PA: CD1 (São Luís) PA1=50.872, PA2=65.550,  PA3=160.000 ;
+          CD2 (Santos)   PA1=32.622, PA2=162.334, PA3=462.358.
+      MP em-trânsito p/ R8: NENHUM — toda MP comprada em R7 entregou até o Dia 35
+      (verificado: entregas dos 11 caminhões caem nos dias 32-35).
+    R8 = PA3 @ R$24 (IND rodada_8). Carteira real R8 = 1.335.398 PA3 (todos Dia 39).
+    Há 622.358 PA3 já em estoque nos CDs — o over-build começa a escoar.
+    """
+    cfg = Config.load(BASE)
+    flam = BASE / "solver_v2" / "rodadas" / "rodada_8" / "FLAMENGO.xlsm"
+    estoque_mp = {"MP1": 49.75, "MP2": 49.48, "MP3": 41.63}
+    estoque_pa = {
+        "CD1": {"PA1": 50_872, "PA2": 65_550,  "PA3": 160_000},  # São Luís
+        "CD2": {"PA1": 32_622, "PA2": 162_334, "PA3": 462_358},  # Santos
+    }
+    # DRE oficial realizada (solver_v2/rodadas/rodada_8/DRE_FLAMENGO.pdf): R1..R7.
+    historico = [-5_602_321.0, -11_554_929.0, 35_617_989.0, -1_356_169.0,
+                 1_603_752.0, 38_569_647.0, 28_520_764.0]
+    return consolidar_estado(8, flam, cfg, estoque_mp, estoque_pa, historico)
+
+
+def estado_r9_flamengo() -> EstadoRodada:
+    """Estado de início de R9 (= fim de R8). R8 FOI submetida; a previsão do solver_v3
+    cravou o estoque real (resultado 0,018% — ver análise R8→R9).
+
+    Fonte: solver_v3/rodadas/rodada_9/ESTOQUES_FLAMENGO.pdf (saldos no Dia 40).
+      MP F1 Joinville: MP1=79,50t, MP2=41,43t, MP3=24,60t
+      PA: CD1 (São Luís) PA1=50.872, PA2=124.019, PA3=111.738 ;
+          CD2 (Santos)   PA1=32.622, PA2=162.334, PA3=0.
+      MP em-trânsito p/ R9: NENHUM — toda MP comprada em R8 entregou até o Dia 40
+      (verificado: MP1 Manaus chega Dia 39-40, MP2 Cuiabá Dia 38, MP3 P.Alegre Dia 39).
+      consolidar_estado confirma isso lendo o SOL_TRANSP do FLAMENGO.xlsm.
+    R9 = PA2 @ R$55 (IND rodada_9). Carteira real R9 = 928.973 PA2 (todos Dia 43).
+    """
+    cfg = Config.load(BASE)
+    flam = BASE / "solver_v3" / "rodadas" / "rodada_9" / "FLAMENGO.xlsm"
+    estoque_mp = {"MP1": 79.50, "MP2": 41.43, "MP3": 24.60}
+    estoque_pa = {
+        "CD1": {"PA1": 50_872, "PA2": 124_019, "PA3": 111_738},  # São Luís
+        "CD2": {"PA1": 32_622, "PA2": 162_334, "PA3": 0},        # Santos
+    }
+    # DRE oficial realizada (solver_v3/rodadas/rodada_9/DRE_FLAMENGO.pdf): R1..R8.
+    historico = [-5_602_321.0, -11_554_929.0, 35_617_989.0, -1_356_169.0,
+                 1_603_752.0, 38_569_647.0, 28_520_764.0, 24_541_201.0]
+    return consolidar_estado(9, flam, cfg, estoque_mp, estoque_pa, historico)
+
+
+def estado_r10_flamengo() -> EstadoRodada:
+    """Estado de início de R10 (= fim de R9). R9 FOI submetida; previsão cravou
+    (resultado 0,087% no plano enviado, após corrigir o frete c/ CT-e).
+
+    Fonte: solver_v3/rodadas/rodada_10/ESTOQUES_FLAMENGO.pdf (saldos no Dia 45).
+      MP F1 Joinville: MP1=116,66t, MP2=50,40t (cheio), MP3=27,37t
+      PA: CD1 (São Luís) PA1=50.872, PA2=974,    PA3=111.738 ;
+          CD2 (Santos)   PA1=32.622, PA2=150.789, PA3=0.
+      MP em-trânsito p/ R10: consolidar_estado detecta automaticamente do SOL_TRANSP.
+    R10 = PA3 @ R$27 (IND rodada_10). Carteira real R10 = 1.492.994 PA3 (todos Dia 47 = dia rel 2).
+    """
+    cfg = Config.load(BASE)
+    flam = BASE / "solver_v3" / "rodadas" / "rodada_10" / "FLAMENGO.xlsm"
+    estoque_mp = {"MP1": 116.66, "MP2": 50.40, "MP3": 27.37}
+    estoque_pa = {
+        "CD1": {"PA1": 50_872, "PA2": 974,     "PA3": 111_738},  # São Luís
+        "CD2": {"PA1": 32_622, "PA2": 150_789, "PA3": 0},        # Santos
+    }
+    # DRE oficial realizada (solver_v3/rodadas/rodada_10/DRE_FLAMENGO.pdf): R1..R9.
+    historico = [-5_602_321.0, -11_554_929.0, 35_617_989.0, -1_356_169.0,
+                 1_603_752.0, 38_569_647.0, 28_520_764.0, 24_541_201.0, 40_749_742.0]
+    return consolidar_estado(10, flam, cfg, estoque_mp, estoque_pa, historico)
+
+
+def estado_r11_flamengo() -> EstadoRodada:
+    """Estado de início de R11 (= fim de R10). R10 FOI submetida (plano PROTEGIDO: buffer
+    400k PA2 em Santos). Resultado real 31,2M (previsão 0,043%); o bug dos 955 derrubou
+    955 frascos de BH (NS 88,4%).
+
+    Fonte: solver_v3/rodadas/rodada_11/ESTOQUES_FLAMENGO.pdf (saldos no Dia 50).
+      MP F1 Joinville: MP1=7,27t (BAIXO!), MP2=0, MP3=0,49t
+      PA: CD1 (São Luís) PA1=50.872, PA2=974,    PA3=1.740 ;
+          CD2 (Santos)   PA1=32.622, PA2=399.685, PA3=0.
+      MP em-trânsito p/ R11: consolidar_estado detecta do SOL_TRANSP.
+    R11 = PA1 @ R$77 (IND rodada_11). Carteira real R11 = 381.544 PA1 (espalhada dias 52-55).
+    ATENÇÃO: MP1 baixíssimo (7,27t) e PA1 consome 60g MP1/frasco → precisa comprar ~16t MP1;
+    o buffer de 400k PA2 NÃO ajuda (rodada é PA1) e custa ~R$200k/rodada de carregamento.
+    """
+    cfg = Config.load(BASE)
+    flam = BASE / "solver_v3" / "rodadas" / "rodada_11" / "FLAMENGO.xlsm"
+    estoque_mp = {"MP1": 7.27, "MP2": 0.0, "MP3": 0.49}
+    estoque_pa = {
+        "CD1": {"PA1": 50_872, "PA2": 974,     "PA3": 1_740},  # São Luís
+        "CD2": {"PA1": 32_622, "PA2": 399_685, "PA3": 0},      # Santos
+    }
+    # DRE oficial realizada (solver_v3/rodadas/rodada_11/DRE_FLAMENGO.pdf): R1..R10.
+    historico = [-5_602_321.0, -11_554_929.0, 35_617_989.0, -1_356_169.0,
+                 1_603_752.0, 38_569_647.0, 28_520_764.0, 24_541_201.0, 40_749_742.0, 31_227_724.0]
+    return consolidar_estado(11, flam, cfg, estoque_mp, estoque_pa, historico)
+
+
 if __name__ == "__main__":
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
