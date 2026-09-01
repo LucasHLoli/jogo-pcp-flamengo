@@ -408,6 +408,65 @@ def estado_r11_flamengo() -> EstadoRodada:
     return consolidar_estado(11, flam, cfg, estoque_mp, estoque_pa, historico)
 
 
+def estado_r12_flamengo() -> EstadoRodada:
+    """Estado de início de R12 (= fim de R11). R11 FOI submetida (multimodal + inter-rodada);
+    resultado real 19,3M (previsão 0,35%), NS 100%. ÚLTIMA RODADA.
+
+    Fonte: solver_v3/rodadas/rodada_12/ESTOQUES_FLAMENGO.pdf (saldos no Dia 55).
+      MP F1 Joinville: MP1=0,12t, MP2=0,77t, MP3=2,10t (baixo — o grosso está EM TRÂNSITO)
+      PA: CD1 (São Luís) PA1=4.513, PA2=974,    PA3=1.740 ;
+          CD2 (Santos)   PA1=0,    PA2=399.685, PA3=0.
+      MP em-trânsito p/ R12: o ~133t pré-pedido na R11 (inter-rodada) chega agora —
+      consolidar_estado detecta do SOL_TRANSP (lê modal+lead corretamente).
+    R12 = RODADA DUPLA: PA1 @ R$84 + PA2 @ R$44 (IND rodada_12). Carteiras: PA1 398.133, PA2 967.681.
+    NOTA: última rodada → rodar com horizonte 0 (sem pré-pedir MP pra futuro inexistente).
+    Os 400k de PA2 em Santos finalmente são usados (R12 tem demanda PA2).
+    """
+    cfg = Config.load(BASE)
+    flam = BASE / "solver_v3" / "rodadas" / "rodada_12" / "FLAMENGO.xlsm"
+    estoque_mp = {"MP1": 0.12, "MP2": 0.77, "MP3": 2.10}
+    estoque_pa = {
+        "CD1": {"PA1": 4_513, "PA2": 974,     "PA3": 1_740},  # São Luís
+        "CD2": {"PA1": 0,     "PA2": 399_685, "PA3": 0},      # Santos
+    }
+    # DRE oficial realizada (solver_v3/rodadas/rodada_12/DRE_FLAMENGO.pdf): R1..R11.
+    historico = [-5_602_321.0, -11_554_929.0, 35_617_989.0, -1_356_169.0, 1_603_752.0,
+                 38_569_647.0, 28_520_764.0, 24_541_201.0, 40_749_742.0, 31_227_724.0, 19_296_696.0]
+    return consolidar_estado(12, flam, cfg, estoque_mp, estoque_pa, historico)
+
+
+def estado_r13_flamengo() -> EstadoRodada:
+    """Estado de início de R13 (= fim de R12). R12 (dupla PA1+PA2) FOI submetida, mas o
+    professor "trolou": a demanda real exigiu MUITO mais PA1 do que tínhamos em buffer
+    (apostamos os 400k de buffer em PA2), então o PA1 vendeu só 52,8% (210.016 de ~398k)
+    enquanto o PA2 fez 91,2%. NS empresa R12 = 80%. Resultado ~R$50,5M (vs 58,1M previsto).
+    Fim de R12 ZEROU o estoque de PA (vendeu/escoou tudo) → entramos em R13 SEM buffer.
+
+    Fonte: solver_v3/rodadas/rodada_13/ESTOQUES_FLAMENGO.pdf (saldos no Dia 60).
+      MP F1 Joinville: MP1=21,62t (sobra — compramos MP1 demais p/ um PA1 que não vendeu),
+                       MP2=0,00t, MP3=0,17t
+      PA: CD1 (São Luís) PA3=1.740 (resto zero) ; CD2 (Santos) tudo zero.
+      MP em-trânsito p/ R13: NENHUM — R12 rodou horizonte 0 (era "última rodada"), sem
+      pré-pedido inter-rodada.
+    R13 = RODADA TRIPLA: PA1 @ R$68 + PA2 @ R$44 + PA3 @ R$19 (IND rodada_13).
+    Demanda total 1.996.187 (PA1 304.126 · PA2 696.733 · PA3 995.328); capacidade ~50.400
+    min/sem só cobre ~84% e o Dia 1 pede 633.709 → NS será limitado por capacidade+buffer-zero.
+    """
+    cfg = Config.load(BASE)
+    flam = BASE / "solver_v3" / "rodadas" / "rodada_13" / "FLAMENGO.xlsm"
+    estoque_mp = {"MP1": 21.62, "MP2": 0.0, "MP3": 0.17}
+    estoque_pa = {
+        "CD1": {"PA1": 0, "PA2": 0, "PA3": 1_740},  # São Luís (único saldo de PA)
+        "CD2": {"PA1": 0, "PA2": 0, "PA3": 0},       # Santos (zerado)
+    }
+    # DRE oficial realizada R1..R12. R12 ~50,5M reconstruído (a DRE da rodada_13 rolou a
+    # janela e ficou inconsistente — "troll"; receita acum. crava R12 = R$56,49M de venda).
+    historico = [-5_602_321.0, -11_554_929.0, 35_617_989.0, -1_356_169.0, 1_603_752.0,
+                 38_569_647.0, 28_520_764.0, 24_541_201.0, 40_749_742.0, 31_227_724.0,
+                 19_296_696.0, 50_459_441.0]
+    return consolidar_estado(13, flam, cfg, estoque_mp, estoque_pa, historico)
+
+
 if __name__ == "__main__":
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")

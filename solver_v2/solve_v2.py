@@ -21,8 +21,10 @@ from src.io_xlsm import escrever_planos_de_df
 from solver.state import (estado_r4_flamengo, estado_r5_flamengo,
                            estado_r6_flamengo, estado_r7_flamengo,
                            estado_r8_flamengo, estado_r9_flamengo, estado_r10_flamengo,
-                           estado_r11_flamengo)
-from solver.solve import ops_r4, ops_r5, ops_r6, ops_r7, ops_r8, ops_r9, ops_r10, ops_r11
+                           estado_r11_flamengo, estado_r12_flamengo,
+                           estado_r13_flamengo)
+from solver.solve import (ops_r4, ops_r5, ops_r6, ops_r7, ops_r8, ops_r9, ops_r10,
+                          ops_r11, ops_r12, ops_r13)
 from solver.milp import (PAS, MPS, MODAIS, BOM, VEL_UN_MIN, CAP_MODAL_TON,
                          FRETE_VIAGEM, FRETE_PESO, PESO_UN_TON, DOC_MODAL, _cap_un)
 from solver_v2.milp_multi import resolver_multi, DIAS
@@ -36,11 +38,15 @@ PRECO_POR_RODADA = {4: {"PA1": 80, "PA2": 50, "PA3": 20},
                     8: {"PA1": 80, "PA2": 50, "PA3": 24},  # PA3 R8 = R$24 (IND rodada_8)
                     9: {"PA1": 80, "PA2": 55, "PA3": 32},  # PA2 R9 = R$55 (IND rodada_9)
                     10: {"PA1": 80, "PA2": 55, "PA3": 27},  # PA3 R10 = R$27 (IND rodada_10)
-                    11: {"PA1": 77, "PA2": 55, "PA3": 27}}  # PA1 R11 = R$77 (IND rodada_11)
+                    11: {"PA1": 77, "PA2": 55, "PA3": 27},  # PA1 R11 = R$77 (IND rodada_11)
+                    12: {"PA1": 84, "PA2": 44, "PA3": 27},  # R12 DUPLA: PA1 R$84 + PA2 R$44 (IND rodada_12)
+                    13: {"PA1": 68, "PA2": 44, "PA3": 19}}  # R13 TRIPLA: PA1 R$68 + PA2 R$44 + PA3 R$19 (IND rodada_13)
 ESTADO_OPS = {4: (estado_r4_flamengo, ops_r4), 5: (estado_r5_flamengo, ops_r5),
               6: (estado_r6_flamengo, ops_r6), 7: (estado_r7_flamengo, ops_r7),
               8: (estado_r8_flamengo, ops_r8), 9: (estado_r9_flamengo, ops_r9),
-              10: (estado_r10_flamengo, ops_r10), 11: (estado_r11_flamengo, ops_r11)}
+              10: (estado_r10_flamengo, ops_r10), 11: (estado_r11_flamengo, ops_r11),
+              12: (estado_r12_flamengo, ops_r12),
+              13: (estado_r13_flamengo, ops_r13)}
 PRECO_FUT = {"PA1": 80, "PA2": 50, "PA3": 32}
 FIX = {"Parcela terrenos": -506968, "Parcela máquinas": -415567, "Contratação MO": -84,
        "Manut fábricas": -1313, "Salário operários": -450, "Custo produção": -172086,

@@ -62,8 +62,9 @@ def main():
     estado = ESTADO_OPS[rodada][0]()
     ops = ESTADO_OPS[rodada][1]()
     precos = PRECO_POR_RODADA[rodada]
-    produto = ops[0]["pa"]
-    preco_prod = precos[produto]
+    produtos_rod = sorted(set(o["pa"] for o in ops))   # rodada pode ser dupla (ex.: R12 PA1+PA2)
+    produto = "+".join(produtos_rod)
+    preco_prod = "/".join(str(precos[p]) for p in produtos_rod)
     day_map = {o["cidade"]: o["dia_entrega"] for o in ops}
     fc = prever_proximas(3, rodada_atual=rodada)
 

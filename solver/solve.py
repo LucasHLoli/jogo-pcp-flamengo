@@ -155,6 +155,71 @@ def ops_r11():
     ]]
 
 
+def ops_r12():
+    """OPs oficiais de R12 (Rodada_12_PA1.pdf + Rodada_12_PA2.pdf). RODADA DUPLA: PA1 E PA2.
+    dia_entrega RELATIVO (abs-55): 56→1, 57→2, 58→3, 59→4. Espalhada.
+    PA1 total 398.133 (prev 398.131), PA2 total 967.681 (prev 967.683). ÚLTIMA RODADA."""
+    pa1 = [("Belém", 5375, 4), ("Belo Horizonte", 29860, 2), ("Brasília", 22893, 2),
+           ("Campinas", 23888, 1), ("Campo Grande", 4579, 2), ("Cuiabá", 5494, 2),
+           ("Curitiba", 20145, 1), ("Fortaleza", 18274, 4), ("Goiânia", 12820, 2),
+           ("João Pessoa", 10750, 3), ("Joinville", 5494, 1), ("Maceió", 10750, 3),
+           ("Manaus", 5375, 4), ("Natal", 10750, 4), ("Porto Alegre", 20145, 1),
+           ("Recife", 16124, 3), ("Ribeirão Preto", 19907, 1), ("Rio de Janeiro", 39813, 2),
+           ("Salvador", 21499, 3), ("Santos", 19907, 1), ("São Luís", 5375, 4),
+           ("São Paulo", 49766, 1), ("Uberlândia", 9953, 2), ("Vitória", 5972, 2),
+           ("Vitória da Conquista", 3225, 3)]
+    pa2 = [("Belém", 16934, 4), ("Belo Horizonte", 50803, 2), ("Brasília", 72576, 2),
+           ("Campinas", 40643, 1), ("Campo Grande", 14515, 2), ("Cuiabá", 17418, 2),
+           ("Curitiba", 63867, 1), ("Fortaleza", 57577, 4), ("Goiânia", 40643, 2),
+           ("João Pessoa", 33869, 3), ("Joinville", 17418, 1), ("Maceió", 33869, 3),
+           ("Manaus", 16934, 4), ("Natal", 33869, 4), ("Porto Alegre", 63867, 1),
+           ("Recife", 50803, 3), ("Ribeirão Preto", 33869, 1), ("Rio de Janeiro", 67738, 2),
+           ("Salvador", 67738, 3), ("Santos", 33869, 1), ("São Luís", 16934, 4),
+           ("São Paulo", 84672, 1), ("Uberlândia", 16934, 2), ("Vitória", 10161, 2),
+           ("Vitória da Conquista", 10161, 3)]
+    return ([{"cidade": c, "pa": "PA1", "qtd": q, "dia_entrega": d} for c, q, d in pa1] +
+            [{"cidade": c, "pa": "PA2", "qtd": q, "dia_entrega": d} for c, q, d in pa2])
+
+
+def ops_r13():
+    """OPs oficiais de R13 (Rodada_13_PA1/PA2/PA3.pdf). RODADA TRIPLA: PA1 + PA2 + PA3.
+    dia_entrega RELATIVO (abs-60): 61→1, 62→2, 63→3, 64→4 (Dia 65 vazio). Espalhada.
+    Totais: PA1 304.126, PA2 696.733, PA3 995.328 → DEMANDA TOTAL 1.996.187 frascos.
+    ATENÇÃO: começamos SEM buffer de PA (só 1.740 PA3 em CD1) após o "troll" da R12 (zerou
+    o estoque). Capacidade da fábrica (~50.400 min/sem) só cobre ~84% da demanda total
+    mesmo a pleno, e o Dia 1 sozinho pede 633.709 frascos → NS limitado por capacidade+buffer."""
+    pa1 = [("Belém", 4106, 3), ("Belo Horizonte", 22810, 1), ("Brasília", 17487, 1),
+           ("Campinas", 18248, 4), ("Campo Grande", 3497, 1), ("Cuiabá", 4197, 1),
+           ("Curitiba", 15389, 4), ("Fortaleza", 13959, 3), ("Goiânia", 9793, 1),
+           ("João Pessoa", 8211, 2), ("Joinville", 4197, 4), ("Maceió", 8211, 2),
+           ("Manaus", 4106, 3), ("Natal", 8211, 3), ("Porto Alegre", 15389, 4),
+           ("Recife", 12317, 2), ("Ribeirão Preto", 15206, 4), ("Rio de Janeiro", 30413, 1),
+           ("Salvador", 16423, 2), ("Santos", 15206, 4), ("São Luís", 4106, 3),
+           ("São Paulo", 38016, 4), ("Uberlândia", 7603, 1), ("Vitória", 4562, 1),
+           ("Vitória da Conquista", 2463, 2)]
+    pa2 = [("Belém", 12193, 3), ("Belo Horizonte", 36578, 1), ("Brasília", 52255, 1),
+           ("Campinas", 29263, 4), ("Campo Grande", 10451, 1), ("Cuiabá", 12541, 1),
+           ("Curitiba", 45984, 4), ("Fortaleza", 41455, 3), ("Goiânia", 29263, 1),
+           ("João Pessoa", 24386, 2), ("Joinville", 12541, 4), ("Maceió", 24386, 2),
+           ("Manaus", 12193, 3), ("Natal", 24386, 3), ("Porto Alegre", 45984, 4),
+           ("Recife", 36578, 2), ("Ribeirão Preto", 24386, 4), ("Rio de Janeiro", 48771, 1),
+           ("Salvador", 48771, 2), ("Santos", 24386, 4), ("São Luís", 12193, 3),
+           ("São Paulo", 60964, 4), ("Uberlândia", 12193, 1), ("Vitória", 7316, 1),
+           ("Vitória da Conquista", 7316, 2)]
+    pa3 = [("Belém", 14930, 3), ("Belo Horizonte", 52255, 1), ("Brasília", 87091, 1),
+           ("Campinas", 41804, 4), ("Campo Grande", 17418, 1), ("Cuiabá", 20902, 1),
+           ("Curitiba", 76640, 4), ("Fortaleza", 50762, 3), ("Goiânia", 48771, 1),
+           ("João Pessoa", 29860, 2), ("Joinville", 20902, 4), ("Maceió", 29860, 2),
+           ("Manaus", 14930, 3), ("Natal", 29860, 3), ("Porto Alegre", 76640, 4),
+           ("Recife", 44790, 2), ("Ribeirão Preto", 34836, 4), ("Rio de Janeiro", 69673, 1),
+           ("Salvador", 59720, 2), ("Santos", 34836, 4), ("São Luís", 14930, 3),
+           ("São Paulo", 87091, 4), ("Uberlândia", 17418, 1), ("Vitória", 10451, 1),
+           ("Vitória da Conquista", 8958, 2)]
+    return ([{"cidade": c, "pa": "PA1", "qtd": q, "dia_entrega": d} for c, q, d in pa1] +
+            [{"cidade": c, "pa": "PA2", "qtd": q, "dia_entrega": d} for c, q, d in pa2] +
+            [{"cidade": c, "pa": "PA3", "qtd": q, "dia_entrega": d} for c, q, d in pa3])
+
+
 def ops_r3():
     return [{"cidade": c, "pa": "PA3", "qtd": q, "dia_entrega": d} for c, q, d in [
         ("Belém", 20155, 5), ("Belo Horizonte", 70544, 3), ("Brasília", 117573, 3),

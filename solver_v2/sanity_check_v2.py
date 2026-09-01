@@ -24,8 +24,10 @@ from solver.milp import (PAS, MPS, BOM, VEL_UN_MIN, CAP_MODAL_TON,
                          FRETE_VIAGEM, FRETE_PESO, PESO_UN_TON, DOC_MODAL, _cap_un)
 from solver.state import (estado_r4_flamengo, estado_r5_flamengo,
                           estado_r6_flamengo, estado_r7_flamengo, estado_r8_flamengo,
-                          estado_r9_flamengo, estado_r10_flamengo, estado_r11_flamengo)
-from solver.solve import ops_r4, ops_r5, ops_r6, ops_r7, ops_r8, ops_r9, ops_r10, ops_r11
+                          estado_r9_flamengo, estado_r10_flamengo, estado_r11_flamengo,
+                          estado_r12_flamengo, estado_r13_flamengo)
+from solver.solve import (ops_r4, ops_r5, ops_r6, ops_r7, ops_r8, ops_r9, ops_r10,
+                          ops_r11, ops_r12, ops_r13)
 
 RODADA = int(sys.argv[1]) if len(sys.argv) > 1 else 6
 # 2º arg opcional: pasta-fonte do envio (default solver_v2; use "solver_v3" p/ a v3).
@@ -34,11 +36,14 @@ ABS0 = (RODADA - 1) * 5          # dia absoluto antes do Dia 1 da rodada
 _PRECO_ROD = {4: {"PA1": 80, "PA2": 50, "PA3": 20}, 5: {"PA1": 69, "PA2": 50, "PA3": 32},
               6: {"PA1": 69, "PA2": 48, "PA3": 32}, 7: {"PA1": 80, "PA2": 44, "PA3": 32},
               8: {"PA1": 80, "PA2": 50, "PA3": 24}, 9: {"PA1": 80, "PA2": 55, "PA3": 32},
-              10: {"PA1": 80, "PA2": 55, "PA3": 27}, 11: {"PA1": 77, "PA2": 55, "PA3": 27}}
+              10: {"PA1": 80, "PA2": 55, "PA3": 27}, 11: {"PA1": 77, "PA2": 55, "PA3": 27},
+              12: {"PA1": 84, "PA2": 44, "PA3": 27}, 13: {"PA1": 68, "PA2": 44, "PA3": 19}}
 _ESTADO_OPS = {4: (estado_r4_flamengo, ops_r4), 5: (estado_r5_flamengo, ops_r5),
                6: (estado_r6_flamengo, ops_r6), 7: (estado_r7_flamengo, ops_r7),
                8: (estado_r8_flamengo, ops_r8), 9: (estado_r9_flamengo, ops_r9),
-               10: (estado_r10_flamengo, ops_r10), 11: (estado_r11_flamengo, ops_r11)}
+               10: (estado_r10_flamengo, ops_r10), 11: (estado_r11_flamengo, ops_r11),
+               12: (estado_r12_flamengo, ops_r12),
+               13: (estado_r13_flamengo, ops_r13)}
 PRECO = _PRECO_ROD[RODADA]
 MAIOR_MP = {"MP1": 56000, "MP2": 22000, "MP3": 41000}
 # Base FIXA p/ carregamento de PA (1% = R$/frasco), independente do preço da rodada.
@@ -137,6 +142,7 @@ def main():
 
     ops_det = []
     ns_qt = 0; total_qt = sum(o["qtd"] for o in ops); ns_ok_cnt = 0
+    receita_ok = 0.0                                  # receita por-produto (rodada pode ser dupla)
     descartes = 0
     for o in ops:
         d_ent = o["dia_entrega"]
@@ -146,7 +152,7 @@ def main():
                               if c == o["cidade"] and pa == o["pa"] and dd != d_ent)
         ok = abs(entregue_exato - o["qtd"]) < 1
         if ok:
-            ns_ok_cnt += 1; ns_qt += o["qtd"]
+            ns_ok_cnt += 1; ns_qt += o["qtd"]; receita_ok += o["qtd"] * PRECO[o["pa"]]
         if entregue_outros > 0.5:
             descartes += entregue_outros
         ops_det.append((o["cidade"], o["pa"], o["qtd"], d_ent, round(entregue_exato),
@@ -264,8 +270,8 @@ def main():
         frete += frete_exato(r["modal"], km(r["modal"], fab, r["cidd"]), r["qt"], r["item"])
     for r in cdv:
         frete += frete_exato(r["modal"], km(r["modal"], r["cido"], r["cidd"]), r["qt"], r["item"])
-    produto = ops[0]["pa"]                         # produto da rodada (todos iguais)
-    receita = ns_qt * PRECO[produto]               # preço do produto DESTA rodada
+    produto = "+".join(sorted(set(o["pa"] for o in ops)))   # ex.: "PA1+PA2" em rodada dupla
+    receita = receita_ok                                    # receita por-produto (calculada no loop de NS)
     custo_mp = sum(mp_comprado[mp] * cheap[mp] for mp in MPS)
     # Carregamento de MP: exclui a MP que chegou no dia 5 (compra-buffer recém-recebida
     # não paga carregamento; validado vs DRE real R8, MP1 cravou). Ver project_carregamento_calibrado.

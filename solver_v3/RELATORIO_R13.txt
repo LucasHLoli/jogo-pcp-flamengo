@@ -1,0 +1,43 @@
+================================================================
+  SOLVER v3 (estocástico no dia) — RODADA 13 — PLANO E PREVISÃO
+================================================================
+  Status: OptimizationStatus.FEASIBLE  (540s)  alpha=100
+  Dias futuros ~ distribuição: d1:4% d2:33% d3:26% d4:29% d5:8%
+
+────────────────────────────────────────────────────────────────
+  DRE PREVISTA — R13
+────────────────────────────────────────────────────────────────
+  Receita PA1+PA2+PA3 (1,189,789 un × R$68/44/19)    R$      34,654,590
+  (-) Compra MP                            R$      -6,598,036
+  (-) Frete (regra calibrada)              R$      -4,363,131
+  (-) Carregamento MP (buffer)             R$              -0
+  (-) Carregamento PA (buffer)             R$              -0
+  (-) Parcela terrenos                     R$        -506,968
+  (-) Parcela máquinas                     R$        -415,567
+  (-) Contratação MO                       R$             -84
+  (-) Manut fábricas                       R$          -1,313
+  (-) Salário operários                    R$            -450
+  (-) Custo produção                       R$        -172,086
+  (-) Manut CDs                            R$         -26,683
+  ----------------------------------------------------------
+  RESULTADO R13                             R$      22,570,272
+
+────────────────────────────────────────────────────────────────
+  INDICADORES PREVISTOS — R13
+────────────────────────────────────────────────────────────────
+  Nível de Serviço (NS)          59.6%   (1,189,789 de 1,996,187 frascos)
+  Utilização fábrica média       59.4%
+  Min usados/dia               {1: 9782, 2: 10080, 3: 10080, 4: 0, 5: 0}
+  Transportes                  220/220  (MP 106 | F1→CD 28 | CD→V 86)
+
+────────────────────────────────────────────────────────────────
+  ESTOQUE FINAL R13 (= buffer pré-posicionado p/ próxima)
+────────────────────────────────────────────────────────────────
+  MP no F1 (ton):  MP1 0.0  MP2 0.0  MP3 0.0
+    MP1: compra 65.7t (R$ 3,151,628) | consumo 87.3 | fim 0.0
+    MP2: compra 66.1t (R$ 1,057,181) | consumo 66.1 | fim 0.0
+    MP3: compra 67.3t (R$ 2,389,228) | consumo 67.5 | fim 0.0
+
+────────────────────────────────────────────────────────────────
+  PREVISÃO DOS CENÁRIOS FUTUROS (1/3 cada produto; demanda espalhada nos dias)
+────────────────────────────────────────────────────────────────

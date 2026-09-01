@@ -1,0 +1,44 @@
+================================================================
+  SOLVER v3 (estocástico no dia) — RODADA 12 — PLANO E PREVISÃO
+================================================================
+  Status: OptimizationStatus.FEASIBLE  (120s)  alpha=100
+  Dias futuros ~ distribuição: d1:4% d2:33% d3:26% d4:29% d5:8%
+
+────────────────────────────────────────────────────────────────
+  DRE PREVISTA — R12
+────────────────────────────────────────────────────────────────
+  Receita PA1+PA2 (1,248,524 un × R$84/44)    R$      66,168,776
+  (-) Compra MP                            R$      -2,086,058
+  (-) Frete (regra calibrada)              R$      -4,888,245
+  (-) Carregamento MP (buffer)             R$            -617
+  (-) Carregamento PA (buffer)             R$            -435
+  (-) Parcela terrenos                     R$        -506,968
+  (-) Parcela máquinas                     R$        -415,567
+  (-) Contratação MO                       R$             -84
+  (-) Manut fábricas                       R$          -1,313
+  (-) Salário operários                    R$            -450
+  (-) Custo produção                       R$        -172,086
+  (-) Manut CDs                            R$         -26,683
+  ----------------------------------------------------------
+  RESULTADO R12                             R$      58,070,270
+
+────────────────────────────────────────────────────────────────
+  INDICADORES PREVISTOS — R12
+────────────────────────────────────────────────────────────────
+  Nível de Serviço (NS)          91.4%   (1,248,524 de 1,365,814 frascos)
+  Utilização fábrica média       74.1%
+  Min usados/dia               {1: 10080, 2: 10028, 3: 10080, 4: 7134, 5: 0}
+  Transportes                  400/220  (MP 12 | F1→CD 178 | CD→V 210)
+
+────────────────────────────────────────────────────────────────
+  ESTOQUE FINAL R12 (= buffer pré-posicionado p/ próxima)
+────────────────────────────────────────────────────────────────
+  MP no F1 (ton):  MP1 11.0  MP2 0.0  MP3 0.0
+    MP1: compra 0.0t (R$ 0) | consumo 59.1 | fim 11.0
+    MP2: compra 57.0t (R$ 911,639) | consumo 95.7 | fim 0.0
+    MP3: compra 36.7t (R$ 1,174,419) | consumo 69.8 | fim 0.0
+  PA em CD1 (São Luís): {'PA3': 1740}
+
+────────────────────────────────────────────────────────────────
+  PREVISÃO DOS CENÁRIOS FUTUROS (1/3 cada produto; demanda espalhada nos dias)
+────────────────────────────────────────────────────────────────
